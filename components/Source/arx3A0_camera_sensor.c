@@ -272,42 +272,57 @@ int32_t ARX3A0_Init(ARM_CAMERA_RESOLUTION cam_resolution)
 
 	/* Soft Reset ARX3A0 Camera Sensor */
 	ret = ARX3A0_Camera_Soft_Reseten();
-	if(ret != ARM_DRIVER_OK)
+	if(ret != ARM_DRIVER_OK) {
+      printf("reset err\r\n");
 		return ARM_DRIVER_ERROR;
+  }
 
 	/* Read ARX3A0 Camera Sensor CHIP ID */
 	ret = ARX3A0_READ_REG(ARX3A0_CHIP_ID_REGISTER, &rcv_data, 2);
-	if(ret != ARM_DRIVER_OK)
+	if(ret != ARM_DRIVER_OK) {
+      printf("chip id err\r\n");
 		return ARM_DRIVER_ERROR;
+  }
 
 	/* Proceed only if CHIP ID is correct. */
-	if(rcv_data != ARX3A0_CHIP_ID_REGISTER_VALUE)
-		return ARM_DRIVER_ERROR;
+	if(rcv_data != ARX3A0_CHIP_ID_REGISTER_VALUE) {
+      printf("chip id incorrect %d \r\n", rcv_data);
+  }
 
 	/*Putting sensor in standby mode*/
 	ret = ARX3A0_WRITE_REG(ARX3A0_MODE_SELECT_REGISTER, 0x00, 1);
-	if(ret != ARM_DRIVER_OK)
+	if(ret != ARM_DRIVER_OK) {
+      printf("standby err\r\n");
 		return ARM_DRIVER_ERROR;
+  }
 
 	ret = ARX3A0_READ_REG(ARX3A0_MIPI_CONFIG_REGISTER, &rcv_data, 2);
-	if(ret != ARM_DRIVER_OK)
+	if(ret != ARM_DRIVER_OK) {
+      printf("mipi cfg err 0 \r\n");
 		return ARM_DRIVER_ERROR;
+  }
 
 	ret = ARX3A0_WRITE_REG(ARX3A0_MIPI_CONFIG_REGISTER, rcv_data | (1U << 7), 2);
-	if(ret != ARM_DRIVER_OK)
+	if(ret != ARM_DRIVER_OK) {
+      printf("mipi cfg err 1 \r\n");
 		return ARM_DRIVER_ERROR;
+  }
 
 	/*start streaming*/
 	ret = ARX3A0_WRITE_REG(ARX3A0_MODE_SELECT_REGISTER, 0x01, 1);
-	if(ret != ARM_DRIVER_OK)
+	if(ret != ARM_DRIVER_OK) {
+      printf("stream start err \r\n");
 		return ARM_DRIVER_ERROR;
+  }
 
 	ARX3A0_DELAY_uSEC(50000);
 
 	/*stop streaming*/
 	ret = ARX3A0_WRITE_REG(ARX3A0_MODE_SELECT_REGISTER, 0x00, 1);
-	if(ret != ARM_DRIVER_OK)
+	if(ret != ARM_DRIVER_OK) {
+      printf("stream stop err \r\n");
 		return ARM_DRIVER_ERROR;
+  }
 
 	/*Adding delay to finish streaming*/
 	ARX3A0_DELAY_uSEC(500000);

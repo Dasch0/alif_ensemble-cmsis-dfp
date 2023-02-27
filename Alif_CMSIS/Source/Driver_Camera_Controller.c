@@ -768,31 +768,41 @@ static int32_t CAMERAx_Initialize(CAMERA_CTRL_DEV                     *cam_ctrl,
   if (cam_ctrl->status.flags & CAMERA_CTRL_FLAG_INIT)
   {
     /* Driver is already initialized */
+    printf("Driver already initialized");
     return ARM_DRIVER_OK;
   }
 
-  if (!cb_event)
+  if (!cb_event) {
+        printf("No cb event provided\n");
     return ARM_DRIVER_ERROR_PARAMETER;
+  }
 
   /* Set the user callback event. */
   cam_ctrl->cb_event = cb_event;
 
   /* Call Camera Sensor specific init */
   ret = cam_sensor->Ops->Init(cam_resolution);
-  if(ret != ARM_DRIVER_OK)
+  if(ret != ARM_DRIVER_OK) {
+        printf("sensor_init_failed\n");
     return ret;
+  }
 
 #if (RTE_MIPI_CSI2)
+  printf("attempting mipi csi2\n");
   /*Initializing MIPI CSI2 if the sensor is MIPI CSI2 sensor*/
   ret = Driver_MIPI_CSI2.Initialize(ARM_MIPI_CSI2_Event_Callback, RTE_ARX3A0_CAMERA_SENSOR_FREQ);
-  if(ret != ARM_DRIVER_OK)
+  if(ret != ARM_DRIVER_OK) {
+    printf("mipi csi2 failed\n");
     return ret;
+  }
 #endif
 
   /* Camera Controller init */
   ret = cam_ctrl_init(cam_ctrl,cam_sensor,cam_resolution);
-  if(ret != ARM_DRIVER_OK)
+  if(ret != ARM_DRIVER_OK) {
+    printf("controller init failed \n");
     return ret;
+  }
 
   /* Set the driver flag as initialized. */
   cam_ctrl->status.flags = CAMERA_CTRL_FLAG_INIT;
@@ -1217,6 +1227,11 @@ static void CAMERAx_IRQHandler(CAMERA_CTRL_DEV *cam_ctrl)
 static int32_t CAMERA0_Initialize(ARM_CAMERA_RESOLUTION               cam_resolution,
                                   ARM_CAMERA_CONTROLLER_SignalEvent_t cb_event)
 {
+#if (RTE_MT9M114_CAMERA_SENSOR_ENABLE)
+  printf("starting MT9M camera");
+#elif (RTE_ARX3A0_CAMERA_SENSOR_ENABLE)
+  printf("starting arx3a0 camera");
+#endif
   return (CAMERAx_Initialize(&camera0_ctrl, camera0_sensor, cam_resolution, cb_event));
 }
 
